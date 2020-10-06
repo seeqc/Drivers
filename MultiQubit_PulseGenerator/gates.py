@@ -2,7 +2,7 @@
 from copy import copy
 import numpy as np
 import logging
-from sequence import Step
+#from sequence import Step
 log = logging.getLogger('LabberDriver')
 
 # TODO remove Step dep from CompositeGate
@@ -174,18 +174,23 @@ class ReadoutGate(OneQubitGate):
     """Readouts the qubit state."""
 
 
-class CustomGate(BaseGate):
+class CustomGate(OneQubitGate):
     """A gate using a given :obj:`Pulse`.
 
     Parameters
     ----------
-    pulse : :obj:`Pulse`
-        The corresponding pulse.
+    pulse : :obj:`Pulse`: The corresponding pulse.
+    gate_type: 'str' : The waveform to apply the gate too.
 
     """
-
-    def __init__(self, pulse):
+    
+    def __init__(self, pulse,gate_type):
         self.pulse = pulse
+        self.gate_type=gate_type
+        
+    def __str__(self):
+        
+        return "Custom Gate"
 
 
 class RabiGate(SingleQubitXYRotation):
@@ -252,41 +257,41 @@ class CompositeGate:
         gate : :obj:`BaseGate` or list of :obj:`BaseGate`
             The gate(s) to add.
         """
-        if qubit is None:
-            if self.n_qubit == 1:
-                qubit = 0
-            else:
-                qubit = [n for n in range(self.n_qubit)]
+        # if qubit is None:
+        #     if self.n_qubit == 1:
+        #         qubit = 0
+        #     else:
+        #         qubit = [n for n in range(self.n_qubit)]
 
-        step = Step()
-        if isinstance(gate, list):
-            if len(gate) == 1:
-                raise ValueError(
-                    "For single gates, don't provide gate as a list.")
-            if not isinstance(qubit, list):
-                raise ValueError(
-                    """Please provide qubit indices as a list when adding more
-                    than one gate.""")
-            if len(gate) != len(qubit):
-                raise ValueError(
-                    "Length of gate list must equal length of qubit list.")
+        # step = Step()
+        # if isinstance(gate, list):
+        #     if len(gate) == 1:
+        #         raise ValueError(
+        #             "For single gates, don't provide gate as a list.")
+        #     if not isinstance(qubit, list):
+        #         raise ValueError(
+        #             """Please provide qubit indices as a list when adding more
+        #             than one gate.""")
+        #     if len(gate) != len(qubit):
+        #         raise ValueError(
+        #             "Length of gate list must equal length of qubit list.")
 
-            for q, g in zip(qubit, gate):
-                step.add_gate(q, g)
+        #     for q, g in zip(qubit, gate):
+        #         step.add_gate(q, g)
 
-        else:
-            if gate.number_of_qubits() > 1:
-                if not isinstance(qubit, list):
-                    raise ValueError(
-                        """Please provide qubit list for gates with more than
-                        one qubit.""")
-            else:
-                if not isinstance(qubit, int):
-                    raise ValueError(
-                        "For single gates, give qubit as int (not list).")
-            step.add_gate(qubit, gate)
+        # else:
+        #     if gate.number_of_qubits() > 1:
+        #         if not isinstance(qubit, list):
+        #             raise ValueError(
+        #                 """Please provide qubit list for gates with more than
+        #                 one qubit.""")
+        #     else:
+        #         if not isinstance(qubit, int):
+        #             raise ValueError(
+        #                 "For single gates, give qubit as int (not list).")
+        #     step.add_gate(qubit, gate)
 
-        self.sequence.append(step)
+        # self.sequence.append(step)
 
     def number_of_qubits(self):
         return self.n_qubit

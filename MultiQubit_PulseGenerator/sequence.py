@@ -580,6 +580,7 @@ class SequenceToWaveforms:
             Description of returned object.
 
         """
+        
         self.sequence = sequence
         self.sequence_list = sequence.sequence_list
         # log.info('Start of get_waveforms. Len sequence list: {}'.format(len(self.sequence_list)))
@@ -597,7 +598,6 @@ class SequenceToWaveforms:
 
         self._add_timings()
         # log.info('Point 5: Sequence_list[6].gates = {}'.format(self.sequence_list[6].gates))
-
         self._init_waveforms()
         # log.info('Point 6: Sequence_list[6].gates = {}'.format(self.sequence_list[6].gates))
 
@@ -1088,6 +1088,7 @@ class SequenceToWaveforms:
             if self.n_pts % 2 == 1:
                 # Odd n_pts give spectral leakage in FFT
                 self.n_pts += 1
+        
         for n in range(self.n_qubit):
             self._wave_xy[n] = np.zeros(self.n_pts, dtype=np.complex)
             # log.info('wave z {} initiated to 0'.format(n))
@@ -1109,7 +1110,7 @@ class SequenceToWaveforms:
             if self.n_pts_readout % 2 == 1:
                 # Odd n_pts give spectral leakage in FFT
                 self.n_pts_readout += 1
-
+                
         self.readout_trig = np.zeros(self.n_pts_readout, dtype=float)
         self.readout_iq = np.zeros(self.n_pts_readout, dtype=np.complex)
         self.readout_iq2 = np.zeros(self.n_pts_readout, dtype=np.complex)
@@ -1171,6 +1172,19 @@ class SequenceToWaveforms:
                     else:
                         waveform = self.readout_iq2
                     delay = 0
+                    
+                    
+                elif isinstance(gate_obj, gates.CustomGate):
+                    if gate_obj.gate_type == 'XY':
+                        waveform = self._wave_xy[qubit]
+                        delay = self.wave_xy_delays[qubit]
+                    elif gate_obj.gate_type == 'Z':
+                        waveform = self.wave_z[qubit]
+                    else:
+                        raise ValueError(
+                        "Don't know which waveform to add {} to.".format(
+                            gate_obj))
+                        
                 else:
                     raise ValueError(
                         "Don't know which waveform to add {} to.".format(
